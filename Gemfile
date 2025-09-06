@@ -1,13 +1,15 @@
 source "https://rubygems.org"
 
+ruby "3.4.5"
+
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.0.2.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
-gem "pg", "~> 1.1"
+gem "pg", "~> 1.5"
 # Use the Puma web server [https://github.com/puma/puma]
-gem "puma", ">= 5.0"
+gem "puma", "~> 6.5"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
 gem "importmap-rails"
 # Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
@@ -18,24 +20,23 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.20"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
+gem "solid_cache", "~> 1.0.7"
+gem "solid_queue", "~> 1.2.1"
+gem "solid_cable", "~> 3.0.12"
 
 # Reduces boot times through caching; required in config/boot.rb
-gem "bootsnap", require: false
+gem "bootsnap", "~> 1.18", require: false
 
-# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
-gem "kamal", require: false
+# Kamal deployment removed
 
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
-gem "thruster", require: false
+gem "thruster", "~> 0.1.15", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
@@ -45,7 +46,7 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
-  gem "brakeman", require: false
+  gem "brakeman", "~> 7.1.0", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
@@ -59,26 +60,26 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
-  gem "selenium-webdriver"
+  gem "selenium-webdriver", "~> 4.35.0"
 end
 
 #################################
-gem 'sass-rails', '>= 6'
+gem "sass-rails", "~> 6.0"
 
 
-gem 'devise'
+gem "devise", "~> 4.9"
 
-gem 'stripe'
+gem "stripe", "~> 15.5"
 
-gem 'activeadmin'
+gem "activeadmin", "~> 3.3"
 
 gem 'dotenv-rails', groups: [ :development, :test ]
 
-gem 'image_processing'
+gem "image_processing", "~> 1.13"
 
-gem 'jquery-rails'
+gem "jquery-rails", "~> 4.6"
 
-gem 'rails-i18n'
+gem "rails-i18n", "~> 8.0"
 gem 'i18n-tasks', group: :development
 group :development do
   gem 'i18n-debug'
@@ -157,6 +158,5 @@ gem "boot"
 
 
 group :production do
-  gem 'pg', '~> 1.1'
-  gem 'rails_12factor'
+  gem "rails_12factor", "~> 0.0.3"
 end
