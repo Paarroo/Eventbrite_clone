@@ -3,11 +3,9 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :configure_permitted_parameters, if: :devise_controller?
-  before_action :authenticate_user!, except: [ :show, :index, :home ]
 
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
   rescue_from StripeService::StripeConfigurationError, with: :stripe_configuration_error
-  before_action :authenticate_user!, unless: :devise_controller?
 
   private
 

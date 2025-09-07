@@ -1,36 +1,35 @@
-# db/seeds.rb
 # ================================================================
-# 🌱 SEEDS POUR EVENTBRITE - UTILISANT LES VARIABLES .ENV
+# EVENTBRITE SEEDS - USING .ENV VARIABLES
 # ================================================================
 
 require 'dotenv/load' if Rails.env.development?
 
-puts "🗑️  Nettoyage de la base de données..."
+puts "Cleaning database..."
 
-# Ordre important pour respecter les dépendances
+# Important order to respect dependencies
 Payment.destroy_all if defined?(Payment)
 Attendance.destroy_all if defined?(Attendance)
 Event.destroy_all
 User.destroy_all
 
-puts "✅ Base de données nettoyée !"
+puts "Database cleaned!"
 
 # ================================================================
-# 👥 CRÉATION DES UTILISATEURS ADMIN DEPUIS .ENV
+# ADMIN USERS CREATION FROM .ENV
 # ================================================================
 
-puts "👥 Création des administrateurs depuis .env..."
+puts "Creating administrators from .env..."
 
-# Vérifier que les variables d'environnement existent
+# Check that environment variables exist
 required_env_vars = %w[ADMIN_EMAIL ADMIN_PASSWORD ADMIN_FIRST_NAME ADMIN_LAST_NAME]
 missing_vars = required_env_vars.select { |var| ENV[var].blank? }
 
 if missing_vars.any?
-  puts "❌ Variables d'environnement manquantes dans .env :"
+  puts "Missing environment variables in .env:"
   missing_vars.each { |var| puts "   - #{var}" }
-  puts "🔧 Création d'admins par défaut..."
+  puts "Creating default admins..."
 
-  # Admin par défaut si .env incomplet
+  # Default admin if .env incomplete
   admin = User.create!(
     first_name: "Default",
     last_name: "Admin",
@@ -38,10 +37,10 @@ if missing_vars.any?
     password: "password123",
     password_confirmation: "password123",
     admin: true,
-    description: "Administrateur par défaut"
+    description: "Default administrator"
   )
 else
-  # 1. Admin principal depuis .env
+  # 1. Main admin from .env
   admin = User.create!(
     first_name: ENV['ADMIN_FIRST_NAME'],
     last_name: ENV['ADMIN_LAST_NAME'],
@@ -49,34 +48,34 @@ else
     password: ENV['ADMIN_PASSWORD'],
     password_confirmation: ENV['ADMIN_PASSWORD'],
     admin: true,
-    description: "Administrateur principal configuré via .env"
+    description: "Main administrator configured via .env"
   )
 
-  puts "✅ Admin principal créé : #{admin.email}"
+  puts "Main admin created: #{admin.email}"
 end
 
-# 2. Admin secondaire depuis .env (si défini)
+# 2. Secondary admin from .env (if defined)
 if ENV['ADMIN2_EMAIL'].present?
   admin2 = User.create!(
     first_name: ENV['ADMIN2_FIRST_NAME'] || 'Admin',
-    last_name: ENV['ADMIN2_LAST_NAME'] || 'Secondaire',
+    last_name: ENV['ADMIN2_LAST_NAME'] || 'Secondary',
     email: ENV['ADMIN2_EMAIL'],
     password: ENV['ADMIN2_PASSWORD'] || ENV['ADMIN_PASSWORD'],
     password_confirmation: ENV['ADMIN2_PASSWORD'] || ENV['ADMIN_PASSWORD'],
     admin: true,
-    description: "Administrateur secondaire configuré via .env"
+    description: "Secondary administrator configured via .env"
   )
 
-  puts "✅ Admin secondaire créé : #{admin2.email}"
+  puts "Secondary admin created: #{admin2.email}"
 end
 
 # ================================================================
-# 👥 CRÉATION DES UTILISATEURS DE TEST
+# TEST USERS CREATION
 # ================================================================
 
-puts "👥 Création des utilisateurs de test..."
+puts "Creating test users..."
 
-# Organisateurs d'événements
+# Event organizers
 organisateur1 = User.create!(
   first_name: "Jean",
   last_name: "Martin",
@@ -107,7 +106,7 @@ organisateur3 = User.create!(
   description: "Organisateur d'événements sportifs et de bien-être."
 )
 
-# Participants réguliers
+# Regular participants
 10.times do |i|
   User.create!(
     first_name: "User#{i+1}",
@@ -125,12 +124,12 @@ puts "   - #{User.where(admin: true).count} administrateurs"
 puts "   - #{User.where(admin: false).count} utilisateurs normaux"
 
 # ================================================================
-# 🎉 CRÉATION DES ÉVÉNEMENTS (version simplifiée)
+# EVENTS CREATION (simplified version)
 # ================================================================
 
 puts "🎉 Création des événements..."
 
-# Événements validés à venir
+# Validated upcoming events
 upcoming_events = [
   {
     title: "Hackathon IA & Santé",
@@ -170,7 +169,7 @@ upcoming_events = [
   }
 ]
 
-# Événements en attente
+# Pending events
 pending_events = [
   {
     title: "Conférence Blockchain",
@@ -194,7 +193,7 @@ pending_events = [
   }
 ]
 
-# Créer tous les événements
+# Create all events
 all_events = upcoming_events + pending_events
 all_events.each do |event_data|
   Event.create!(event_data)
@@ -210,11 +209,11 @@ Event.where(validated: true).each do |event|
   participants = available_users.sample(participants_count)
 
   participants.each do |participant|
-    # Déterminer le payment_status selon le prix de l'événement
+    # Determine payment_status according to event price
     payment_status = if event.price == 0
-      'free'  # Événement gratuit
+      'free'  # Free event
     else
-      # 90% de chance d'être payé, 10% en attente
+      # 90% chance to be paid, 10% pending
       rand(1..10) <= 9 ? 'succeeded' : 'pending'
     end
 
@@ -226,12 +225,15 @@ Event.where(validated: true).each do |event|
       created_at: rand(1.week.ago..Time.current)
     )
 
-    # Créer un paiement si nécessaire
+    # Create payment if necessary
     if event.price > 0 && payment_status == 'succeeded'
       Payment.create!(
+        user: attendance.user,
+        event: event,
         attendance: attendance,
         amount: (event.price * 100).to_i, # En centimes
         status: 'succeeded',
+        stripe_checkout_session_id: "cs_test_#{SecureRandom.hex(12)}",
         stripe_payment_intent_id: "pi_test_#{SecureRandom.hex(8)}",
         created_at: attendance.created_at
       )
@@ -249,18 +251,18 @@ puts "\n" + "="*60
 puts "🎉 SEEDS TERMINÉS AVEC SUCCÈS !"
 puts "="*60
 
-puts "\n📊 STATISTIQUES :"
-puts "   👥 Utilisateurs : #{User.count}"
-puts "   🎉 Événements : #{Event.count}"
-puts "   🎫 Participations : #{Attendance.count}"
+puts "\nSTATISTICS:"
+puts "   Users: #{User.count}"
+puts "   Events: #{Event.count}"
+puts "   Attendances: #{Attendance.count}"
 
-puts "\n🔐 COMPTES ADMIN (depuis .env) :"
+puts "\nADMIN ACCOUNTS (from .env):"
 User.where(admin: true).each do |admin_user|
-  puts "   📧 Email : #{admin_user.email}"
-  puts "   👤 Nom : #{admin_user.full_name}"
+  puts "   Email: #{admin_user.email}"
+  puts "   Name: #{admin_user.full_name}"
 end
-puts "   🔑 Mot de passe : #{ENV['ADMIN_PASSWORD'] || 'password123'}"
-puts "   🌐 URL : #{ENV['APP_URL'] || 'http://localhost:3000'}/admin/login"
+puts "   Password: #{ENV['ADMIN_PASSWORD'] || 'password123'}"
+puts "   URL: #{ENV['APP_URL'] || 'http://localhost:3000'}/admin/login"
 
-puts "\n✨ Votre application est prête !"
+puts "\nYour application is ready!"
 puts "="*60

@@ -6,13 +6,13 @@ class Event < ApplicationRecord
   has_many :payments, through: :attendances
 
 
-  # Participants confirmés (payé ou gratuit)
+  # Confirmed participants (paid or free)
   has_many :confirmed_attendances, -> { where(payment_status: [ 'succeeded', 'free' ]) },
            class_name: 'Attendance'
 
   has_many :confirmed_participants, through: :confirmed_attendances, source: :user
 
-  # Participants en attente de paiement
+  # Participants pending payment
   has_many :pending_attendances, -> { where(payment_status: 'pending') },
            class_name: 'Attendance'
 
@@ -25,8 +25,9 @@ class Event < ApplicationRecord
   validates :duration, presence: true, numericality: { greater_than: 0 }
   validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :location, presence: true
+  validate :start_date_cannot_be_in_the_past
 
-  # Scopes pour la validation
+  # Validation scopes
   scope :pending, -> { where(validated: nil) }
   scope :validated, -> { where(validated: true) }
   scope :rejected, -> { where(validated: false) }
@@ -55,27 +56,27 @@ class Event < ApplicationRecord
   end
 
 
-  # Nombre de participants confirmés
+  # Number of confirmed participants
   def confirmed_participants_count
     attendances.where(payment_status: [ 'succeeded', 'free' ]).count
   end
 
-  # Nombre de participants en attente
+  # Number of pending participants
   def pending_participants_count
     attendances.where(payment_status: 'pending').count
   end
 
-  # Revenus de l'événement
+  # Event revenue
   def total_revenue
     attendances.where(payment_status: 'succeeded').joins(:payment).sum('payments.amount') / 100.0
   end
 
-  # Est-ce que l'événement peut être validé ?
+  # Can the event be validated?
   def can_be_validated?
     pending? && start_date > Time.current
   end
 
-  # Est-ce un événement gratuit ?
+  # Is it a free event?
   def free_event?
     price == 0
   end
@@ -93,8 +94,8 @@ class Event < ApplicationRecord
     duration / 60.0
   end
   def participants_count
-     confirmed_participants_count
-   end
+    confirmed_participants_count
+  end
 
   private
 

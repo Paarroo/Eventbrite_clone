@@ -117,18 +117,48 @@
       </div>
     </nav>
 
-    <!-- Flash Messages -->
+    <!-- Flash Messages - Modal Overlay Style -->
     <% if notice %>
-      <div class="notification is-success is-light" id="flash-notice">
-        <button class="delete" onclick="closeNotification('flash-notice')"></button>
-        <%= notice %>
+      <div class="modal is-active" id="flash-notice-modal" 
+           style="animation: fadeIn 0.3s ease-out;">
+        <div class="modal-background" onclick="closeNotificationModal('flash-notice-modal')"></div>
+        <div class="modal-content">
+          <div class="notification is-success is-large has-text-centered" 
+               style="margin: 0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
+            <button class="delete is-large" onclick="closeNotificationModal('flash-notice-modal')"></button>
+            <div class="is-size-5 has-text-weight-medium mb-2">
+              <span class="icon is-medium mr-2">
+                <i class="fas fa-check-circle"></i>
+              </span>
+              Succès
+            </div>
+            <div class="is-size-6">
+              <%= notice %>
+            </div>
+          </div>
+        </div>
       </div>
     <% end %>
 
     <% if alert %>
-      <div class="notification is-danger is-light" id="flash-alert">
-        <button class="delete" onclick="closeNotification('flash-alert')"></button>
-        <%= alert %>
+      <div class="modal is-active" id="flash-alert-modal"
+           style="animation: fadeIn 0.3s ease-out;">
+        <div class="modal-background" onclick="closeNotificationModal('flash-alert-modal')"></div>
+        <div class="modal-content">
+          <div class="notification is-danger is-large has-text-centered"
+               style="margin: 0; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
+            <button class="delete is-large" onclick="closeNotificationModal('flash-alert-modal')"></button>
+            <div class="is-size-5 has-text-weight-medium mb-2">
+              <span class="icon is-medium mr-2">
+                <i class="fas fa-exclamation-triangle"></i>
+              </span>
+              Attention
+            </div>
+            <div class="is-size-6">
+              <%= alert %>
+            </div>
+          </div>
+        </div>
       </div>
     <% end %>
 
@@ -223,6 +253,23 @@
       </div>
     </footer>
 
+    <!-- Styles pour les animations -->
+    <style>
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+      
+      .modal.fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+      }
+    </style>
+
     <!-- JavaScript pour les interactions -->
     <script>
       // Navbar burger toggle
@@ -240,21 +287,33 @@
         });
       });
 
-      function closeNotification(id) {
-        const notification = document.getElementById(id);
-        if (notification) {
-          notification.remove();
+      // Fonction pour fermer les modales de notification
+      function closeNotificationModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.add('fade-out');
+          setTimeout(() => modal.remove(), 300);
         }
       }
 
-      // Auto-hide notifications after 5 seconds
+      // Fermeture automatique après 5 secondes
       setTimeout(() => {
-        const notifications = document.querySelectorAll('.notification');
-        notifications.forEach(notification => {
-          notification.style.opacity = '0';
-          setTimeout(() => notification.remove(), 300);
+        const modals = document.querySelectorAll('.modal[id*="flash-"]');
+        modals.forEach(modal => {
+          if (modal) {
+            modal.classList.add('fade-out');
+            setTimeout(() => modal.remove(), 300);
+          }
         });
       }, 5000);
+
+      // Fermeture avec la touche Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const modals = document.querySelectorAll('.modal[id*="flash-"]');
+          modals.forEach(modal => closeNotificationModal(modal.id));
+        }
+      });
     </script>
   </body>
 </html>

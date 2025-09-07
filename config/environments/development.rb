@@ -72,7 +72,7 @@ Rails.application.configure do
 
 
 
-  use_ssl = ENV['USE_SSL'] == 'false'
+  use_ssl = ENV['USE_SSL'] == 'true'
   use_real_smtp = ENV['USE_REAL_SMTP'] == 'true'
 
   if use_ssl
